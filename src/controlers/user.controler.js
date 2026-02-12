@@ -7,6 +7,8 @@ import { ENV } from "../utils/ENV.js";
 import { OtpTemplate } from "../utils/emailTemplates.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import jwt from "jsonwebtoken";
+import cloudinary from "../config/cloudinary.js";
+import fs from "fs";
 // Register Controler
 export const register = asyncHandler(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -231,5 +233,38 @@ export const getUsers = asyncHandler(async (req, res, next) => {
     success: true,
     message: "Users Fetched Successfully",
     data: users,
+  });
+});
+
+export const updateUser = asyncHandler(async (req, res, next) => {
+  const id = req.user;
+  // Name is Optional and when i don't send it there will be error with can't destructure property (Normal case)
+  const { name } = req.body;
+  const file = req.file;
+
+  const user = await User.findById(id);
+
+  if (!user)
+    return next(new Custom_Error("User Not Found", StatusCodes.BAD_REQUEST));
+
+  user.name = name || user.name;
+
+  // Upload To CLoudinary
+  // TODO => TO MAKE NEW IMAGE OVERRIDE THE OLD ONE
+  let secure_Url = "";
+  if (file) {
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: "SpotifyClone/users",
+    });
+    secure_Url = result.secure_url;
+    user.picture = secure_Url;
+    await user.save();
+    fs.unlinkSync(file.path);
+  }
+
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: "User Updated Successfully",
+    data: user,
   });
 });
