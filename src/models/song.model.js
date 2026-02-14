@@ -16,7 +16,7 @@ const songSchema = new Schema({
   },
   releaseDate: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
   lyrics: {
     type: String,
