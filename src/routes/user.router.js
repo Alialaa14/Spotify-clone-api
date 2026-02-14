@@ -11,7 +11,7 @@ import {
   getUser,
   getUsers,
   updateUser,
-} from "../controlers/user.controler.js";
+} from "../controlers/user.controller.js";
 import {
   forgetPasswordValidator,
   getUserValidator,

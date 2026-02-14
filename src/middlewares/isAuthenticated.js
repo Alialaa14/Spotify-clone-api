@@ -5,7 +5,7 @@ import { ENV } from "../utils/ENV.js";
 
 export const isAuthenticated = (req, res, next) => {
   try {
-    const token = req.headers.authorization.startsWith("Bearer")
+    const token = req.headers.authorization?.startsWith("Bearer")
       ? req.headers.authorization.split(" ")[1]
       : false;
     if (!token) {

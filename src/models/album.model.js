@@ -12,7 +12,7 @@ const albumSchema = new Schema({
   },
   releaseDate: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
   coverImage: {
     type: String,
