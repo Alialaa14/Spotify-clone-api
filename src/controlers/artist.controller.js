@@ -18,10 +18,12 @@ export const createArtist = asyncHandler(async (req, res, next) => {
   const file = req.file;
 
   const existedArtist = await Artist.findOne({ name });
-  if (existedArtist)
+  if (existedArtist) {
+    if (file) fs.unlinkSync(file.path);
     return next(
       new Custom_Error("Artist Already Existed", StatusCodes.BAD_REQUEST),
     );
+  }
 
   let secure_Url = "";
   if (file) {
@@ -39,6 +41,7 @@ export const createArtist = asyncHandler(async (req, res, next) => {
   if (file) {
     artist.image = secure_Url;
     await artist.save();
+    // Delete File
     fs.unlinkSync(file.path);
   }
 
