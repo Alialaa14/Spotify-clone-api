@@ -25,15 +25,12 @@ const albumSchema = new Schema({
     },
   ],
 
-  creator: {
+  artist: {
     type: Schema.Types.ObjectId,
     ref: "Artist",
+    required: [true, "Artist is Required"],
   },
   likes: {
-    type: Number,
-    default: 0,
-  },
-  downloads: {
     type: Number,
     default: 0,
   },
