@@ -27,11 +27,11 @@ const songSchema = new Schema({
     type: String,
     required: [true, "Song Url is required"],
   },
-  song_duration: {
-    type: String,
-    required: [true, "Duration is Required"],
-    trim: true,
-  },
+  // song_duration: {
+  //   type: String,
+  //   required: [true, "Duration is Required"],
+  //   trim: true,
+  // },
   artist: {
     type: Schema.Types.ObjectId,
     ref: "Artist",
@@ -39,7 +39,6 @@ const songSchema = new Schema({
   album: {
     type: Schema.Types.ObjectId,
     ref: "Album",
-    default: "",
   },
   likes: {
     type: Number,

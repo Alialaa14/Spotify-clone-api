@@ -41,5 +41,5 @@ router
   .delete(isAuthenticated, isAuthorized, deleteAlbumValidator, deleteAlbum)
   .get(isAuthenticated, isAuthorized, getAlbumValidator, getAlbum);
 
-router.route("/:id/like").put(isAuthenticated, likeAlbum);
+router.route("/:id/like").patch(isAuthenticated, likeAlbum);
 export default router;
