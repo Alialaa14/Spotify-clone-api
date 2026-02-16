@@ -32,7 +32,7 @@ const songSchema = new Schema({
     required: [true, "Duration is Required"],
     trim: true,
   },
-  creator: {
+  artist: {
     type: Schema.Types.ObjectId,
     ref: "Artist",
   },
