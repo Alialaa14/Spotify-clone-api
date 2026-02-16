@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
     cb(null, true);
-  } else if (file.mimetype === "mp3" || file.mimetype === "wav") {
+  } else if (file.mimetype === "audio/mpeg" || file.mimetype === "audio/wav") {
     cb(null, true);
   } else {
     cb(null, false);

@@ -4,6 +4,7 @@ import { isAuthorized } from "../middlewares/isAuthorized.js";
 import {
   createArtist,
   deleteArtist,
+  followArtist,
   getArtist,
   getArtists,
   updateArtist,
@@ -38,5 +39,7 @@ router
   )
   .delete(isAuthenticated, isAuthorized, deleteArtistValidator, deleteArtist)
   .get(isAuthenticated, getArtistValidator, getArtist);
+
+router.route("/:id/follow").patch(isAuthenticated, followArtist);
 
 export default router;

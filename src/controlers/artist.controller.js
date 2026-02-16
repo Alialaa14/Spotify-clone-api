@@ -12,6 +12,7 @@ import fs from "fs";
 import { StatusCodes } from "http-status-codes";
 import Song from "../models/song.model.js";
 import Album from "../models/album.model.js";
+import User from "../models/user.model.js";
 
 export const createArtist = asyncHandler(async (req, res, next) => {
   const { name, bio } = req.body;
@@ -149,5 +150,42 @@ export const getArtists = asyncHandler(async (req, res, next) => {
     success: true,
     message: "Artists Fetched Successfully",
     data: artists,
+  });
+});
+
+export const followArtist = asyncHandler(async (req, res, next) => {
+  const artistId = req.params.id;
+  const userId = req.user;
+
+  const artist = await Artist.findById(artistId);
+  if (!artist)
+    return next(new Custom_Error("Artist Not Found", StatusCodes.NOT_FOUND));
+
+  const user = await User.findById(userId);
+  if (!user)
+    return next(
+      new Custom_Error(
+        "User Not Found Please Login First",
+        StatusCodes.NOT_FOUND,
+      ),
+    );
+  const isFollowed = user.followedArtists.includes(artistId);
+  if (isFollowed) {
+    user.followedArtists.pull(artistId);
+    artist.followers.pull(userId);
+    artist.followersCount -= 1;
+  } else {
+    user.followedArtists.push(artistId);
+    artist.followers.push(userId);
+    artist.followersCount += 1;
+  }
+  await user.save();
+  await artist.save();
+
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: isFollowed
+      ? "Artist Unfollowed Successfully"
+      : "Artist Followed Successfully",
   });
 });
