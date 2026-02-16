@@ -78,8 +78,8 @@ export const updateAlbum = asyncHandler(async (req, res, next) => {
       folder: `SpotifyClone/albums/${album.artist}/${album.title}`,
     });
     secure_url = result.secure_url;
-    fs.unlinkSync(file.path);
   }
+  fs.unlinkSync(file.path);
   const updateAlbum = await Album.findByIdAndUpdate(
     albumId,
     {
