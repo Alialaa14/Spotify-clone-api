@@ -9,6 +9,7 @@ import { sendEmail } from "../utils/sendEmail.js";
 import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
+import { cleanTempFilesAfterUpload } from "../utils/cleanTempFiles.js";
 // Register Controler
 export const register = asyncHandler(async (req, res, next) => {
   const { name, email, password } = req.body;
@@ -259,7 +260,7 @@ export const updateUser = asyncHandler(async (req, res, next) => {
     secure_Url = result.secure_url;
     user.picture = secure_Url;
     await user.save();
-    fs.unlinkSync(file.path);
+    cleanTempFilesAfterUpload([file]);
   }
 
   return res.status(StatusCodes.OK).json({
