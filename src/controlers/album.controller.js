@@ -3,12 +3,11 @@ import Album from "../models/album.model.js";
 import Artist from "../models/artist.model.js";
 import Song from "../models/song.model.js";
 import Custom_Error from "../utils/Custom_Error.js";
-import { upload } from "../utils/multer.js";
 import cloudinary from "../config/cloudinary.js";
 import { StatusCodes } from "http-status-codes";
 import fs from "fs";
 import User from "../models/user.model.js";
-import mongoose from "mongoose";
+import { cleanTempFilesAfterUpload } from "../utils/cleanTempFiles.js";
 
 export const createAlbum = asyncHandler(async (req, res, next) => {
   const { title, description, releaseDate, artistId } = req.body;
@@ -45,8 +44,8 @@ export const createAlbum = asyncHandler(async (req, res, next) => {
     artist: artistId,
     coverImage: secure_url,
   });
-  fs.unlinkSync(file.path);
 
+  if (file) cleanTempFilesAfterUpload([file]);
   // Add Album To Artist
   artist.albums.push(album._id);
   await artist.save();
@@ -95,6 +94,7 @@ export const updateAlbum = asyncHandler(async (req, res, next) => {
     return next(
       new Custom_Error("We Couldn't Update Album", StatusCodes.BAD_REQUEST),
     );
+  if (file) cleanTempFilesAfterUpload([file]);
   return res.status(StatusCodes.OK).json({
     success: true,
     message: "Album Updated Successfully",

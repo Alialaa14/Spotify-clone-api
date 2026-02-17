@@ -7,11 +7,13 @@ import fs from "fs";
 import { StatusCodes } from "http-status-codes";
 import Artist from "../models/artist.model.js";
 import User from "../models/user.model.js";
+import { cleanTempFilesAfterUpload } from "../utils/cleanTempFiles.js";
+
 export const addSong = asyncHandler(async (req, res, next) => {
   const { title, description, lyrics, releaseDate } = req.body;
   const { artistId, albumId } = req.query;
-  const coverImage = req.files?.coverImage[0].path;
-  const song = req.files?.song[0].path;
+  const coverImage = req.files?.coverImage[0];
+  const song = req.files?.song[0];
 
   const existingSong = await Song.findOne({ title, artist: artistId });
 
@@ -31,10 +33,10 @@ export const addSong = asyncHandler(async (req, res, next) => {
         StatusCodes.BAD_REQUEST,
       ),
     );
-  // TODO -- unlink song and coverImage if we can't create song and if we create it
+
   // upload CoverImage to cloudinary
   const { secure_url: coverImage_url } = await cloudinary.uploader.upload(
-    coverImage,
+    coverImage.path,
     {
       folder: `SpotifyClone/songs/${artistId}-coverImage`,
       resource_type: "image",
@@ -42,7 +44,7 @@ export const addSong = asyncHandler(async (req, res, next) => {
   );
 
   // upload Song to Cloudinary
-  const { secure_url: song_url } = await cloudinary.uploader.upload(song, {
+  const { secure_url: song_url } = await cloudinary.uploader.upload(song.path, {
     folder: `SpotifyClone/songs/${artistId}`,
     resource_type: "video",
   });
@@ -76,6 +78,8 @@ export const addSong = asyncHandler(async (req, res, next) => {
       return next(new Custom_Error("Album Not Found", StatusCodes.BAD_REQUEST));
   }
 
+  cleanTempFilesAfterUpload([coverImage, song]);
+
   res.status(StatusCodes.CREATED).json({
     success: true,
     message: "Song Created Successfully",
@@ -86,7 +90,7 @@ export const addSong = asyncHandler(async (req, res, next) => {
 export const updateSong = asyncHandler(async (req, res, next) => {
   const { title, description, lyrics, releaseDate } = req.body;
   const songId = req.params.id;
-  const coverImage = req.file.path;
+  const coverImage = req.file;
 
   const song = await Song.findById(songId);
 
@@ -95,7 +99,7 @@ export const updateSong = asyncHandler(async (req, res, next) => {
 
   // upload CoverImage to cloudinary
   const { secure_url: coverImage_url } = await cloudinary.uploader.upload(
-    coverImage,
+    coverImage.path,
     {
       folder: `SpotifyClone/songs/${song.artist}-coverImage`,
       resource_type: "image",
@@ -116,6 +120,9 @@ export const updateSong = asyncHandler(async (req, res, next) => {
 
   if (!updateSong) return next(new Custom_Error("We Couldn't Update Song"));
 
+  if (coverImage) {
+    cleanTempFilesAfterUpload([coverImage]);
+  }
   res.status(StatusCodes.OK).json({
     success: true,
     message: "Song Updated Successfully",

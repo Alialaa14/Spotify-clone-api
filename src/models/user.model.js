@@ -50,7 +50,13 @@ const userSchema = new Schema({
       ref: "Artist",
     },
   ],
-  likedPlaylits: [
+  likedPlaylists: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Playlist",
+    },
+  ],
+  playlists: [
     {
       type: Schema.Types.ObjectId,
       ref: "Playlist",

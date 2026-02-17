@@ -13,6 +13,7 @@ import { StatusCodes } from "http-status-codes";
 import Song from "../models/song.model.js";
 import Album from "../models/album.model.js";
 import User from "../models/user.model.js";
+import { cleanTempFilesAfterUpload } from "../utils/cleanTempFiles.js";
 
 export const createArtist = asyncHandler(async (req, res, next) => {
   const { name, bio } = req.body;
@@ -43,7 +44,7 @@ export const createArtist = asyncHandler(async (req, res, next) => {
     artist.image = secure_Url;
     await artist.save();
     // Delete File
-    fs.unlinkSync(file.path);
+    cleanTempFilesAfterUpload([file]);
   }
 
   if (!artist)
@@ -86,6 +87,8 @@ export const updateArtist = asyncHandler(async (req, res, next) => {
     return next(
       new Custom_Error("We Couldn't Update Artist", StatusCodes.BAD_REQUEST),
     );
+
+  cleanTempFilesAfterUpload([file]);
 
   return res.status(StatusCodes.OK).json({
     success: true,
