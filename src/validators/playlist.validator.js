@@ -2,7 +2,7 @@ import { validationMiddleware } from "../middlewares/validation.middleware.js";
 import { check } from "express-validator";
 
 export const createPlaylistValidator = [
-  check("name").notEmpty().withMessage("Name is Required").trim(),
+  check("title").notEmpty().withMessage("Title is Required").trim(),
   check("description")
     .optional()
     .isLength({ max: 400 })
@@ -15,7 +15,7 @@ export const createPlaylistValidator = [
 ];
 
 export const updatePlaylistValidator = [
-  check("name").optional().trim(),
+  check("title").optional().trim(),
   check("id")
     .notEmpty()
     .withMessage("id is Required")

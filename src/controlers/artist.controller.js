@@ -142,7 +142,6 @@ export const getArtists = asyncHandler(async (req, res, next) => {
     ];
   }
 
-  console.log(filter);
   const artists = await Artist.find(filter).skip(skip).limit(Number(limit));
 
   if (!artists) return next(new Custom_Error("Artists Not Found", 404));

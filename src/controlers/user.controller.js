@@ -8,7 +8,6 @@ import { OtpTemplate } from "../utils/emailTemplates.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import jwt from "jsonwebtoken";
 import cloudinary from "../config/cloudinary.js";
-import fs from "fs";
 import { cleanTempFilesAfterUpload } from "../utils/cleanTempFiles.js";
 // Register Controler
 export const register = asyncHandler(async (req, res, next) => {
@@ -49,12 +48,9 @@ export const login = asyncHandler(async (req, res, next) => {
   //Match Password
   const matchPassword = await user.comparePassword(password);
 
-  // Fix global error Handler
-  if (!matchPassword)
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ success: false, message: "Incorrect Password" });
-  // return new Custom_Error("Incorrect Password", StatusCodes.BAD_REQUEST);
+  if (!matchPassword) {
+    return next(new Custom_Error("Incorrect Password", StatusCodes.BAD_REQUEST));
+  }
 
   return res.status(200).json({
     success: true,
@@ -148,8 +144,9 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   const decode = jwt.verify(token, ENV.JWT_SECRET);
 
   const isVerified = decode.data.verified;
-  if (!isVerified)
-    return new Custom_Error("User Not Verified", StatusCodes.BAD_REQUEST);
+  if (!isVerified) {
+    return next(new Custom_Error("User Not Verified", StatusCodes.BAD_REQUEST));
+  }
 
   const user = await User.findById(decode.data.id);
 
@@ -267,5 +264,43 @@ export const updateUser = asyncHandler(async (req, res, next) => {
     success: true,
     message: "User Updated Successfully",
     data: user,
+  });
+});
+
+
+export const createAdminUser = asyncHandler(async (req, res, next) => {
+  const { name, email, password, isAdmin = true } = req.body;
+
+  if (!isAdmin) {
+    return next(new Custom_Error("Invalid Role", StatusCodes.BAD_REQUEST));
+  }
+
+  // Check if an admin with this email already exists
+  const existingAdmin = await User.findOne({ email, isAdmin: true });
+
+  if (existingAdmin) {
+    return next(new Custom_Error("Admin Already Exists", StatusCodes.CONFLICT));
+  }
+
+  const adminUser = await User.create({
+    name,
+    email,
+    password,
+    isAdmin,
+  });
+
+  if (!adminUser) {
+    return next(new Custom_Error("Failed to Create Admin User", StatusCodes.INTERNAL_SERVER_ERROR));
+  }
+
+  return res.status(StatusCodes.CREATED).json({
+    success: true,
+    message: "Admin Created Successfully",
+    data: {
+      id: adminUser._id,
+      name: adminUser.name,
+      email: adminUser.email,
+      isAdmin: adminUser.isAdmin,
+    },
   });
 });

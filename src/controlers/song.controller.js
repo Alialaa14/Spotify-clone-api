@@ -147,7 +147,7 @@ export const deleteSong = asyncHandler(async (req, res, next) => {
       new Custom_Error("We Couldn't Update Artist or Artist Not Found"),
     );
 
-  if (deleteSong.Album) {
+  if (deletedSong.album) {
     const album = await Album.findByIdAndUpdate(deletedSong.album, {
       $pull: { songs: songId },
     });

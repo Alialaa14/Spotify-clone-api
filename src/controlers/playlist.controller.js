@@ -65,7 +65,7 @@ export const updatePlaylist = asyncHandler(async (req, res, next) => {
   const file = req.file;
   const { title, description, isPublic } = req.body;
 
-  const playlist = await Playlist.find({ _id: playlistId, creator: user });
+  const playlist = await Playlist.findOne({ _id: playlistId, creator: user });
   if (!playlist) {
     return next(new Custom_Error("Playlist Not Found", StatusCodes.NOT_FOUND));
   }
@@ -80,7 +80,7 @@ export const updatePlaylist = asyncHandler(async (req, res, next) => {
 
   const secure_url = result ? result.secure_url : playlist.coverImage;
 
-  const updatePlaylist = await Playlist.findByIdAndUpdate(
+  const updatedPlaylist = await Playlist.findByIdAndUpdate(
     playlistId,
     {
       title: title || playlist.title,
@@ -91,24 +91,26 @@ export const updatePlaylist = asyncHandler(async (req, res, next) => {
     { new: true },
   );
 
-  if (!updatePlaylist)
+  if (!updatedPlaylist)
     return next(
       new Custom_Error("We Couldn't Update Playlist", StatusCodes.BAD_REQUEST),
     );
 
-  removeTempFiles([file.path]);
+  if (file) {
+    cleanTempFilesAfterUpload([file]);
+  }
 
   return res.status(StatusCodes.OK).json({
     success: true,
     message: "Playlist Updated Successfully",
-    data: updatePlaylist,
+    data: updatedPlaylist,
   });
 });
 export const deletePlaylist = asyncHandler(async (req, res, next) => {
   const playlistId = req.params.id;
   const user = req.user;
 
-  const playlist = await Playlist.find({ _id: playlistId, creator: user });
+  const playlist = await Playlist.findOne({ _id: playlistId, creator: user });
   if (!playlist)
     return next(new Custom_Error("Playlist Not Found", StatusCodes.NOT_FOUND));
 

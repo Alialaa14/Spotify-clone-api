@@ -115,12 +115,24 @@ export const deleteAlbum = asyncHandler(async (req, res, next) => {
       new Custom_Error("We Couldn't Update Artist", StatusCodes.BAD_REQUEST),
     );
 
-  if (!deletedAlbum)
+  if (!deletedAlbum) {
     return next(
       new Custom_Error("We Couldn't Delete Album", StatusCodes.BAD_REQUEST),
     );
+  }
 
+  // Get song IDs before deleting
+  const songsToDelete = await Song.find({ album: albumId }).select('_id');
+  const songIds = songsToDelete.map(song => song._id);
+
+  // Delete songs
   await Song.deleteMany({ album: albumId });
+
+  // Remove songs from artist
+  await Artist.findByIdAndUpdate(deletedAlbum.artist, {
+    $pull: { songs: { $in: songIds } },
+  });
+
   return res.status(StatusCodes.OK).json({
     success: true,
     message: "Album Deleted Successfully",

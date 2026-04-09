@@ -11,6 +11,7 @@ import {
   getUser,
   getUsers,
   updateUser,
+  createAdminUser,
 } from "../controlers/user.controller.js";
 import {
   forgetPasswordValidator,
@@ -36,5 +37,5 @@ router.patch("/verify-account", isAuthenticated, verifyAccount);
 router.get("/:id", isAuthenticated, getUserValidator, getUser);
 router.get("/", isAuthenticated, isAuthorized, getUsers);
 router.patch("/", isAuthenticated, upload.single("pic"), updateUser);
-
+router.post("/admin" , isAuthenticated , isAuthorized , createAdminUser)
 export default router;
